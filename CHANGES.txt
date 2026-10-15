@@ -1,0 +1,140 @@
+================================================================================
+  OVERDUE: THE GREAT RETURN API — BUG FIX CHANGELOG
+  Date: October 15, 2026
+================================================================================
+
+PROBLEM
+-------
+All database-related npm scripts were failing:
+
+  npm run db:create
+  npm run db:migrate
+  npm run db:migrate:status
+  npm run db:seed
+  npm run db:check
+
+The error was:
+  ERROR: Error reading "src\config\database.js".
+  Error: SyntaxError: Invalid or unexpected token
+
+ROOT CAUSE
+----------
+Template literals (backtick characters `) were corrupted across multiple source
+files. Instead of proper JavaScript template literals like:
+
+  `Hello ${name}`
+
+the files contained backslashes:
+
+  \Hello \
+
+This caused Node.js to throw a SyntaxError whenever it tried to parse any file
+in the require chain starting from src/config/database.js -> src/config/env.js.
+
+Additionally, the .env file had a placeholder password (your_postgres_password_here)
+instead of the actual PostgreSQL password.
+
+================================================================================
+FILES CHANGED (6 total)
+================================================================================
+
+1. src/config/env.js
+   ─────────────────
+   Line 7 — Fixed corrupted template literal in the error message.
+
+   BEFORE:
+     throw new Error(\Missing required .env keys: \. Copy .env.example ...);
+
+   AFTER:
+     throw new Error(`Missing required .env keys: ${missing.join(', ')}. Copy .env.example ...`);
+
+
+2. src/server.js
+   ─────────────
+   Lines 6, 9 — Fixed corrupted template literals in console output.
+
+   BEFORE:
+     console.error(Could not start the API: );
+     console.log(Listening on port );
+
+   AFTER:
+     console.error(`Could not start the API: ${error.message}`);
+     console.log(`Listening on port ${env.port}`);
+
+
+3. src/middlewares/not-found.js
+   ────────────────────────────
+   Line 5 — Fixed corrupted template literal in 404 error message.
+
+   BEFORE:
+     message: \No route for \ \\,
+
+   AFTER:
+     message: `No route for ${req.method} ${req.originalUrl}`,
+
+
+4. scripts/db-check.js
+   ────────────────────
+   Line 16 — Fixed corrupted template literal in SQL query.
+
+   BEFORE:
+     await sequelize.query(\SELECT COUNT(*)::int AS count FROM \\);
+
+   AFTER:
+     await sequelize.query(`SELECT COUNT(*)::int AS count FROM ${item.table}`);
+
+
+5. db/seeders/20261015000001-demo-overdue-data.js
+   ───────────────────────────────────────────────
+   Lines 29, 61, 62, 63, 65, 66, 67 — Fixed 7 corrupted template literals
+   in SQL queries used to look up IDs for relational inserts.
+
+   BEFORE (example, line 29):
+     await db.query(\SELECT id, position FROM questions WHERE question_set_id = \ ORDER BY position ASC\);
+
+   AFTER:
+     await db.query(`SELECT id, position FROM questions WHERE question_set_id = ${qSet.id} ORDER BY position ASC`);
+
+   All other affected lines followed the same pattern — backslashes replaced
+   with proper backtick template literals with correct variable interpolation.
+
+
+6. .env
+   ────
+   Line 7 — Updated placeholder password to actual PostgreSQL password.
+
+   BEFORE:
+     DB_PASSWORD=your_postgres_password_here
+
+   AFTER:
+     DB_PASSWORD=postgres
+
+
+================================================================================
+VERIFICATION RESULTS
+================================================================================
+
+All five npm scripts now execute successfully:
+
+  COMMAND                    STATUS    DETAILS
+  ─────────────────────────  ────────  ──────────────────────────────────────
+  npm run db:create          PASSED    Database overdue_db created
+  npm run db:migrate         PASSED    All 8 migrations applied
+  npm run db:migrate:status  PASSED    All 8 migrations show status "up"
+  npm run db:seed            PASSED    Demo data seeded successfully
+  npm run db:check           PASSED    All 7 tables match expected row counts
+
+  db:check table results:
+  ┌───────────────────┬──────────┬────────┬─────┐
+  │ table             │ expected │ actual │ ok  │
+  ├───────────────────┼──────────┼────────┼─────┤
+  │ users             │ 6        │ 6      │ yes │
+  │ question_sets     │ 1        │ 1      │ yes │
+  │ questions         │ 5        │ 5      │ yes │
+  │ choices           │ 16       │ 16     │ yes │
+  │ sessions          │ 1        │ 1      │ yes │
+  │ session_players   │ 3        │ 3      │ yes │
+  │ player_answers    │ 6        │ 6      │ yes │
+  └───────────────────┴──────────┴────────┴─────┘
+
+================================================================================

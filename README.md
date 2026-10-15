@@ -1,10 +1,10 @@
-# [Your Game Title] API
+﻿# Overdue: The Great Return API
 
-Backend API for **[Your Game Title]**, a tournament game for the SorSU Bulan Campus library.
+Backend API for **Overdue: The Great Return**, a tournament game for the SorSU Bulan Campus library.
 CS 313 Software Engineering 1, A.Y. 2026-2027.
 
-- Developer: [Your full name] ([your GitHub username]), BSCS [3-1 or 3-2]
-- Group and game concept: [Group name]
+- Developer: Carl Angelo Orlina (icedteacrml11), BSCS 3-2
+- Group and game concept: Solo
 
 This is my own build of my group's game concept. Every commit in this repository was made by me, with Git, on my own computer or in my own Codespace.
 
@@ -20,8 +20,8 @@ This is my own build of my group's game concept. Every commit in this repository
 ## Setup
 
 ```
-git clone [repository-url]
-cd [folder-name]
+git clone https://github.com/icedteacrml11/overdue-the-great-return-api.git
+cd overdue-the-great-return-api
 npm install
 ```
 
@@ -43,7 +43,7 @@ npm run dev
 | PORT | 3001 | Port the API listens on (the library assigns the final port at deployment) |
 | DB_HOST | 127.0.0.1 | PostgreSQL host |
 | DB_PORT | 5432 | PostgreSQL port |
-| DB_NAME | your_game_slug | Database name: your game slug, with underscores |
+| DB_NAME | overdue_db | Database name: your game slug, with underscores |
 | DB_USER | postgres | Database user |
 | DB_PASSWORD | (your own) | Database password. Never commit this. |
 | HUB_API_KEY | dev-hub-key | Key the Library Game Hub sends to read results. The library gives the real one at deployment. |
@@ -60,11 +60,17 @@ Base URL: `http://localhost:3001/api/v1`
 
 ## What "completed" means in my game
 
-[One or two sentences: when does a player count as having completed a game? For example: "A player completed the game when they answered every question, even if some answers were wrong or timed out."]
+A player has completed the game when they reach a distance progress of 10 by answering trivia questions correctly to return all 10 overdue books, or when they have answered all questions in the active session. A game session is completed (status `FINISHED`) once the first player successfully returns all 10 books or when all questions have concluded, recording the winner in `winner_player_id`.
 
 ## Tables
 
-[List your tables, one line each, in the order of your migrations.]
+- `users` — Player, host, and admin accounts with authentication credentials and role constraints.
+- `question_sets` — Collections of campus and library trivia questions curated by hosts.
+- `questions` — Trivia questions with order sequence, question type (`MULTIPLE_CHOICE`, `TRUE_FALSE`), point value, and time limit.
+- `choices` — Answer options for each question with position numbering and correctness indicator.
+- `sessions` — Multiplayer tournament sessions tracked by unique 6-character join code, lifecycle status, and winner reference.
+- `session_players` — Session participants tracking seat assignment, nickname, cumulative score, and distance progress (0–10 books returned).
+- `player_answers` — Recorded player answers per question with response time, chosen option, correctness, and points earned.
 
 ## Database scripts
 

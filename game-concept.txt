@@ -1,0 +1,146 @@
+================================================================================
+  GAME CONCEPT — OVERDUE: THE GREAT RETURN
+  CS 313 Software Engineering 1 | BSCS 3-2
+  Repository: https://github.com/icedteacrml11/overdue-the-great-return-api.git
+================================================================================
+
+GAME TITLE
+  Overdue: The Great Return
+
+SLUG
+  overdue-the-great-return
+
+GENRE
+  Multiplayer quiz race / trivia game
+
+THEME
+  University library — books, campus locations, Philippine literature & trivia
+
+ELEVATOR PITCH
+  A multiplayer quiz race across the university campus where players answer
+  trivia questions to return 10 overdue library books before the head librarian
+  catches them.
+
+================================================================================
+GAMEPLAY OVERVIEW
+================================================================================
+
+GOAL
+  Each player races to move across a 10-step campus map by answering trivia
+  questions correctly. The first player to reach step 10 (return all 10 books)
+  wins the round.
+
+SETUP
+  - A HOST creates a game session, which generates a 6-character JOIN CODE
+    (e.g. "482913").
+  - PLAYERS enter the join code from their own devices to join the session lobby.
+  - The session supports 1 to 30 players simultaneously.
+  - The HOST selects a Question Set containing trivia questions.
+
+FLOW
+  1. HOST starts the session (status changes from LOBBY → ACTIVE).
+  2. All players receive the same question simultaneously.
+  3. Each question has a time limit (15–20 seconds depending on type).
+  4. Players who answer correctly advance 1 step on the campus map.
+  5. Players who answer incorrectly or time out do not advance.
+  6. The race continues question by question.
+  7. The first player to reach distance_progress = 10 wins (winner_player_id
+     is recorded on the session).
+  8. Session status changes to FINISHED.
+
+================================================================================
+QUESTION TYPES
+================================================================================
+
+  MULTIPLE_CHOICE
+    - 4 answer choices per question (positions 1–4).
+    - Exactly 1 correct answer (is_correct = true).
+    - Default time limit: 20 seconds.
+
+  TRUE_FALSE
+    - 2 choices: "True" (position 1) and "False" (position 2).
+    - Exactly 1 is marked correct.
+    - Default time limit: 15 seconds (faster pace).
+
+================================================================================
+ROLES
+================================================================================
+
+  PLAYER   Standard game participant. Joins via join code, answers questions,
+           earns score and distance progress.
+
+  HOST     Creates and manages sessions. Selects the question set. Starts and
+           ends the game. Typically a teacher or librarian.
+
+  ADMIN    Platform administrator. Full access to manage users, question sets,
+           and sessions. Not a game participant.
+
+================================================================================
+SCORING
+================================================================================
+
+  score             Integer, starts at 0. Increases on correct answers.
+                    Cannot go below 0 (enforced by database constraint).
+
+  distance_progress Integer 0–10. Tracks how many "books" the player has
+                    returned. Winning condition is reaching 10.
+                    Enforced as a range constraint (0–10) in the database.
+
+================================================================================
+SESSION STATES
+================================================================================
+
+  LOBBY    → Players are joining. Game has not started.
+  ACTIVE   → Game is in progress. Questions are being answered.
+  FINISHED → Game over. Winner has been recorded.
+
+================================================================================
+SAMPLE QUESTION SET: Philippine Literature & Library Trivia
+================================================================================
+
+  Q1 (MULTIPLE_CHOICE, 20s)
+     "Who wrote Noli Me Tangere?"
+     ✓ Jose Rizal
+     ✗ Andres Bonifacio
+     ✗ Francisco Balagtas
+     ✗ Apolinario Mabini
+
+  Q2 (MULTIPLE_CHOICE, 20s)
+     "What classification system is most commonly used in university libraries?"
+     ✓ Library of Congress Classification
+     ✗ Periodic Table System
+     ✗ Binary Index System
+     ✗ Chronological Ledger
+
+  Q3 (TRUE_FALSE, 15s)
+     "El Filibusterismo is the sequel to Noli Me Tangere."
+     ✓ True
+     ✗ False
+
+  Q4 (MULTIPLE_CHOICE, 20s)
+     "Which pen name was used by Marcelo H. del Pilar?"
+     ✓ Plaridel
+     ✗ Laong Laan
+     ✗ Taga-Ilog
+     ✗ Huseng Batute
+
+  Q5 (TRUE_FALSE, 15s)
+     "Reference books like encyclopedias can normally be checked out for two weeks."
+     ✗ True
+     ✓ False
+
+================================================================================
+TECHNICAL SUMMARY
+================================================================================
+
+  Backend:    Node.js + Express 5 (REST API)
+  Database:   PostgreSQL via Sequelize ORM
+  Base URL:   /api/v1
+  Key routes: GET /api/v1/health
+              GET /api/v1/game-info
+
+  Players:    1 to 30 per session
+  Version:    1.0.0
+  Team:       BSCS 3-2
+
+================================================================================
