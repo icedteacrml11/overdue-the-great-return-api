@@ -19,5 +19,34 @@ const sequelize = new Sequelize(
 //   Player.belongsTo(User, { foreignKey: 'user_id' });
 
 const User = require('./user')(sequelize, DataTypes);
+const QuestionSet = require('./question-set')(sequelize, DataTypes);
+const Session = require('./session')(sequelize, DataTypes);
+const SessionPlayer = require('./session-player')(sequelize, DataTypes);
 
-module.exports = { sequelize, Sequelize, DataTypes, User };
+// Associations matching your foreign keys
+User.hasMany(QuestionSet, { foreignKey: 'host_id' });
+QuestionSet.belongsTo(User, { foreignKey: 'host_id', as: 'host' });
+
+User.hasMany(Session, { foreignKey: 'host_id' });
+Session.belongsTo(User, { foreignKey: 'host_id', as: 'host' });
+
+QuestionSet.hasMany(Session, { foreignKey: 'question_set_id' });
+Session.belongsTo(QuestionSet, { foreignKey: 'question_set_id' });
+
+Session.hasMany(SessionPlayer, { foreignKey: 'session_id', as: 'players' });
+SessionPlayer.belongsTo(Session, { foreignKey: 'session_id' });
+
+User.hasMany(SessionPlayer, { foreignKey: 'user_id' });
+SessionPlayer.belongsTo(User, { foreignKey: 'user_id' });
+
+Session.belongsTo(SessionPlayer, { foreignKey: 'winner_player_id', as: 'winner', constraints: false });
+
+module.exports = {
+  sequelize,
+  Sequelize,
+  DataTypes,
+  User,
+  QuestionSet,
+  Session,
+  SessionPlayer,
+};
