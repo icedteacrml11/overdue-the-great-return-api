@@ -6,7 +6,7 @@
   "variable": [
     { "key": "baseUrl", "value": "http://localhost:3001/api/v1" },
     { "key": "host", "value": "2099-0001" },
-    { "key": "otherHost", "value": "2099-0003" },
+    { "key": "otherHost", "value": "2099-0099" },
     { "key": "player", "value": "2099-1001" },
     { "key": "setId", "value": "" }
   ],

@@ -1,6 +1,9 @@
 module.exports = {
   async up(queryInterface) {
     const db = queryInterface.sequelize;
+    const [[existing]] = await db.query("SELECT user_id FROM users WHERE school_id = '2099-0001'");
+    if (existing) return;
+
     await queryInterface.bulkInsert('users', [
       { school_id: '2099-0001', full_name: 'Librarian Clara Reyes', email: 'clara@overdue.test', role: 'HOST', created_at: new Date() },
       { school_id: '2099-0002', full_name: 'Admin Mateo Cruz', email: 'mateo@overdue.test', role: 'ADMIN', created_at: new Date() },

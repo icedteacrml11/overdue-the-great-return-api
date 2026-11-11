@@ -4,6 +4,6 @@ description: ""
 variables:
   baseUrl: http://localhost:3001/api/v1
   host: 2099-0001
-  otherHost: 2099-0003
+  otherHost: 2099-0099
   player: 2099-1001
   setId: ""
