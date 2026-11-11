@@ -1,0 +1,9 @@
+$kind: collection
+name: "Overdue: The Great Return API - Week 11"
+description: ""
+variables:
+  baseUrl: http://localhost:3001/api/v1
+  host: 2099-0001
+  otherHost: 2099-0003
+  player: 2099-1001
+  setId: ""

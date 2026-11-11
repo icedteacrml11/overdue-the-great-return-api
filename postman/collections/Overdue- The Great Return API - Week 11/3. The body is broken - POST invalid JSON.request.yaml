@@ -1,0 +1,20 @@
+$kind: http-request
+url: "{{baseUrl}}/question-sets"
+method: POST
+headers:
+  Content-Type: application/json
+  X-Demo-User: "{{host}}"
+body:
+  type: text
+  content: |-
+    {
+      "title": "Philippine Literature"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('status is 400 INVALID_JSON', function () {
+        pm.response.to.have.status(400);
+        pm.expect(pm.response.json().error.code).to.eql('INVALID_JSON');
+      });
+    language: text/javascript
+order: 3000

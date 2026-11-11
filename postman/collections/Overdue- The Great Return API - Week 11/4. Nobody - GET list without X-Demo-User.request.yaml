@@ -1,0 +1,16 @@
+$kind: http-request
+url: "{{baseUrl}}/question-sets"
+method: GET
+headers:
+  - key: X-Demo-User
+    value: "{{host}}"
+    disabled: true
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('status is 401 AUTH_REQUIRED', function () {
+        pm.response.to.have.status(401);
+        pm.expect(pm.response.json().error.code).to.eql('AUTH_REQUIRED');
+      });
+    language: text/javascript
+order: 4000

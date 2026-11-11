@@ -1,0 +1,353 @@
+{
+  "info": {
+    "name": "Overdue: The Great Return API - Week 11",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3001/api/v1" },
+    { "key": "host", "value": "2099-0001" },
+    { "key": "otherHost", "value": "2099-0003" },
+    { "key": "player", "value": "2099-1001" },
+    { "key": "setId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1. It works - POST valid body as host",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "pm.collectionVariables.set('setId', pm.response.json().id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-Demo-User", "value": "{{host}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Philippine Literature\"\n}"
+        },
+        "url": "{{baseUrl}}/question-sets"
+      }
+    },
+    {
+      "name": "2. A field is wrong - POST short title",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400 VALIDATION_FAILED', function () {",
+              "  pm.response.to.have.status(400);",
+              "  pm.expect(pm.response.json().error.code).to.eql('VALIDATION_FAILED');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-Demo-User", "value": "{{host}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"ab\"\n}"
+        },
+        "url": "{{baseUrl}}/question-sets"
+      }
+    },
+    {
+      "name": "3. The body is broken - POST invalid JSON",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400 INVALID_JSON', function () {",
+              "  pm.response.to.have.status(400);",
+              "  pm.expect(pm.response.json().error.code).to.eql('INVALID_JSON');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-Demo-User", "value": "{{host}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Philippine Literature\""
+        },
+        "url": "{{baseUrl}}/question-sets"
+      }
+    },
+    {
+      "name": "4. Nobody - GET list without X-Demo-User",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 401 AUTH_REQUIRED', function () {",
+              "  pm.response.to.have.status(401);",
+              "  pm.expect(pm.response.json().error.code).to.eql('AUTH_REQUIRED');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-Demo-User", "value": "{{host}}", "disabled": true }
+        ],
+        "url": "{{baseUrl}}/question-sets"
+      }
+    },
+    {
+      "name": "5. The wrong role - GET list as player",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 403 FORBIDDEN', function () {",
+              "  pm.response.to.have.status(403);",
+              "  pm.expect(pm.response.json().error.code).to.eql('FORBIDDEN');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-Demo-User", "value": "{{player}}" }
+        ],
+        "url": "{{baseUrl}}/question-sets"
+      }
+    },
+    {
+      "name": "6. List - GET list as host",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-Demo-User", "value": "{{host}}" }
+        ],
+        "url": "{{baseUrl}}/question-sets"
+      }
+    },
+    {
+      "name": "7. Read one - GET /{{setId}}",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-Demo-User", "value": "{{host}}" }
+        ],
+        "url": "{{baseUrl}}/question-sets/{{setId}}"
+      }
+    },
+    {
+      "name": "8. It does not exist - GET /999",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 404 QUESTION_SET_NOT_FOUND', function () {",
+              "  pm.response.to.have.status(404);",
+              "  pm.expect(pm.response.json().error.code).to.eql('QUESTION_SET_NOT_FOUND');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-Demo-User", "value": "{{host}}" }
+        ],
+        "url": "{{baseUrl}}/question-sets/999"
+      }
+    },
+    {
+      "name": "9. The id is not a number - GET /abc",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400 VALIDATION_FAILED', function () {",
+              "  pm.response.to.have.status(400);",
+              "  pm.expect(pm.response.json().error.code).to.eql('VALIDATION_FAILED');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-Demo-User", "value": "{{host}}" }
+        ],
+        "url": "{{baseUrl}}/question-sets/abc"
+      }
+    },
+    {
+      "name": "10. Update - PATCH one field as host",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-Demo-User", "value": "{{host}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Philippine Literature 101\"\n}"
+        },
+        "url": "{{baseUrl}}/question-sets/{{setId}}"
+      }
+    },
+    {
+      "name": "11. Not the owner - PATCH same row as otherHost",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 403 FORBIDDEN', function () {",
+              "  pm.response.to.have.status(403);",
+              "  pm.expect(pm.response.json().error.code).to.eql('FORBIDDEN');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-Demo-User", "value": "{{otherHost}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Hijacked Title\"\n}"
+        },
+        "url": "{{baseUrl}}/question-sets/{{setId}}"
+      }
+    },
+    {
+      "name": "12. Nothing to change - PATCH with empty body",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400 VALIDATION_FAILED', function () {",
+              "  pm.response.to.have.status(400);",
+              "  pm.expect(pm.response.json().error.code).to.eql('VALIDATION_FAILED');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-Demo-User", "value": "{{host}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        },
+        "url": "{{baseUrl}}/question-sets/{{setId}}"
+      }
+    },
+    {
+      "name": "13. Delete - DELETE /{{setId}} as host",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 204', function () {",
+              "  pm.response.to.have.status(204);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "X-Demo-User", "value": "{{host}}" }
+        ],
+        "url": "{{baseUrl}}/question-sets/{{setId}}"
+      }
+    }
+  ]
+}
