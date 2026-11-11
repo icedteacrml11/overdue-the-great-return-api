@@ -643,6 +643,30 @@
         "header": [],
         "url": "{{baseUrl}}/sessions/{{code}}/players"
       }
+    },
+    {
+      "name": "24. Question set in use - DELETE /question-sets/1 as host",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 409 QUESTION_SET_IN_USE', function () {",
+              "  pm.response.to.have.status(409);",
+              "  pm.expect(pm.response.json().error.code).to.eql('QUESTION_SET_IN_USE');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "X-Demo-User", "value": "{{host}}" }
+        ],
+        "url": "{{baseUrl}}/question-sets/1"
+      }
     }
   ]
 }
