@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/question-sets"
+method: GET
+headers:
+  X-Demo-User: "{{player}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('status is 403 FORBIDDEN', function () {
+        pm.response.to.have.status(403);
+        pm.expect(pm.response.json().error.code).to.eql('FORBIDDEN');
+      });
+    language: text/javascript
+order: 5000

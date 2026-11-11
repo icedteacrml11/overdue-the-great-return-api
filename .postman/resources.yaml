@@ -2,6 +2,10 @@
 workspace:
   id: f0388d43-6b6a-4ba5-80b3-54ae36ac2f12
 
+cloudResources:
+  collections:
+    ../postman/collections/Overdue- The Great Return API - Week 11: ba3ce165-192c-44ce-b71d-c7ce22509345
+
 # All resources in the `postman/` folder are automatically registered in Local View.
 # Point to additional files outside the `postman/` folder to register them individually. Example:
 #localResources:

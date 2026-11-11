@@ -1,0 +1,14 @@
+$kind: http-request
+name: 16. Read the game - GET /sessions/{{code}}
+url: "{{baseUrl}}/sessions/{{code}}"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('status is 200', function () {
+        pm.response.to.have.status(200);
+        pm.expect(pm.response.json().code).to.eql(pm.collectionVariables.get('code'));
+      });
+    language: text/javascript
+order: 16000
+

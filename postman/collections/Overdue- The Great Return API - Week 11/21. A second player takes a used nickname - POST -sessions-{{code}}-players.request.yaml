@@ -1,0 +1,23 @@
+$kind: http-request
+name: 21. A second player takes a used nickname - POST /sessions/{{code}}/players
+url: "{{baseUrl}}/sessions/{{code}}/players"
+method: POST
+headers:
+  Content-Type: application/json
+  X-Demo-User: 2099-1002
+body:
+  type: text
+  content: |-
+    {
+      "nickname": "BookRunner"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('status is 409 NICKNAME_TAKEN', function () {
+        pm.response.to.have.status(409);
+        pm.expect(pm.response.json().error.code).to.eql('NICKNAME_TAKEN');
+      });
+    language: text/javascript
+order: 21000
+

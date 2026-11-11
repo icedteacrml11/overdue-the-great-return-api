@@ -4,7 +4,7 @@ module.exports = {
       id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
       join_code: { type: Sequelize.CHAR(6), allowNull: false, unique: true },
       host_id: { type: Sequelize.INTEGER, allowNull: false, references: { model: 'users', key: 'user_id' }, onDelete: 'CASCADE' },
-      question_set_id: { type: Sequelize.INTEGER, allowNull: false, references: { model: 'question_sets', key: 'id' }, onDelete: 'CASCADE' },
+      question_set_id: { type: Sequelize.INTEGER, allowNull: false, references: { model: 'question_sets', key: 'id' }, onDelete: 'RESTRICT' },
       status: { type: Sequelize.STRING(20), allowNull: false, defaultValue: 'LOBBY' },
       winner_player_id: { type: Sequelize.INTEGER, allowNull: true },
       started_at: { type: Sequelize.DATE, allowNull: true },

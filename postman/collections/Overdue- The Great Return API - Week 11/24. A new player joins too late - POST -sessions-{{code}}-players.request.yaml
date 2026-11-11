@@ -1,0 +1,23 @@
+$kind: http-request
+name: 24. A new player joins too late - POST /sessions/{{code}}/players
+url: "{{baseUrl}}/sessions/{{code}}/players"
+method: POST
+headers:
+  Content-Type: application/json
+  X-Demo-User: 2099-1002
+body:
+  type: text
+  content: |-
+    {
+      "nickname": "LateReader"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('status is 409 SESSION_NOT_JOINABLE', function () {
+        pm.response.to.have.status(409);
+        pm.expect(pm.response.json().error.code).to.eql('SESSION_NOT_JOINABLE');
+      });
+    language: text/javascript
+order: 24000
+

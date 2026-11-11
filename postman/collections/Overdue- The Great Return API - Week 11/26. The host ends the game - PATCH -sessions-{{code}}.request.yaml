@@ -1,0 +1,23 @@
+$kind: http-request
+name: 26. The host ends the game - PATCH /sessions/{{code}}
+url: "{{baseUrl}}/sessions/{{code}}"
+method: PATCH
+headers:
+  Content-Type: application/json
+  X-Demo-User: "{{host}}"
+body:
+  type: text
+  content: |-
+    {
+      "status": "FINISHED"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('status is 200 and session status is FINISHED', function () {
+        pm.response.to.have.status(200);
+        pm.expect(pm.response.json().status).to.eql('FINISHED');
+      });
+    language: text/javascript
+order: 26000
+

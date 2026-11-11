@@ -1,0 +1,23 @@
+$kind: http-request
+name: 22. A nickname that is too short - POST /sessions/{{code}}/players
+url: "{{baseUrl}}/sessions/{{code}}/players"
+method: POST
+headers:
+  Content-Type: application/json
+  X-Demo-User: 2099-1002
+body:
+  type: text
+  content: |-
+    {
+      "nickname": "A"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('status is 400 VALIDATION_FAILED', function () {
+        pm.response.to.have.status(400);
+        pm.expect(pm.response.json().error.code).to.eql('VALIDATION_FAILED');
+      });
+    language: text/javascript
+order: 22000
+
