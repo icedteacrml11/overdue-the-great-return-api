@@ -1,0 +1,25 @@
+$kind: http-request
+name: 15. Join game - POST /sessions/{{code}}/players as player 1
+url: "{{baseUrl}}/sessions/{{code}}/players"
+method: POST
+headers:
+  Content-Type: application/json
+  X-Demo-User: "{{player}}"
+body:
+  type: text
+  content: |-
+    {
+      "nickname": "BookRunner"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('status is 201 and rejoined is false', function () {
+        pm.response.to.have.status(201);
+        const body = pm.response.json();
+        pm.expect(body.rejoined).to.eql(false);
+        pm.collectionVariables.set('playerId', body.player_id);
+      });
+    language: text/javascript
+order: 15000
+

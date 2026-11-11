@@ -1,0 +1,27 @@
+$kind: http-request
+name: 14. Start game - POST /sessions as host
+url: "{{baseUrl}}/sessions"
+method: POST
+headers:
+  Content-Type: application/json
+  X-Demo-User: "{{host}}"
+body:
+  type: text
+  content: |-
+    {
+      "question_set_id": 1
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('status is 201 and LOBBY with 6-digit code', function () {
+        pm.response.to.have.status(201);
+        const body = pm.response.json();
+        pm.expect(body.status).to.eql('LOBBY');
+        pm.expect(body.code).to.match(/^[1-9][0-9]{5}$/);
+        pm.collectionVariables.set('code', body.code);
+        pm.collectionVariables.set('player2', '2099-1002');
+      });
+    language: text/javascript
+order: 14000
+

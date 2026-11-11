@@ -7,3 +7,6 @@ variables:
   otherHost: 2099-0099
   player: 2099-1001
   setId: ""
+  code: ""
+  playerId: ""
+  player2: ""

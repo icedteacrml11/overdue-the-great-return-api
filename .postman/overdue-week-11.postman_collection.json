@@ -8,7 +8,10 @@
     { "key": "host", "value": "2099-0001" },
     { "key": "otherHost", "value": "2099-0099" },
     { "key": "player", "value": "2099-1001" },
-    { "key": "setId", "value": "" }
+    { "key": "player2", "value": "2099-1002" },
+    { "key": "setId", "value": "" },
+    { "key": "code", "value": "" },
+    { "key": "playerId", "value": "" }
   ],
   "item": [
     {
@@ -347,6 +350,298 @@
           { "key": "X-Demo-User", "value": "{{host}}" }
         ],
         "url": "{{baseUrl}}/question-sets/{{setId}}"
+      }
+    },
+    {
+      "name": "14. Start game - POST /sessions as host",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201 and LOBBY with 6-digit code', function () {",
+              "  pm.response.to.have.status(201);",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.status).to.eql('LOBBY');",
+              "  pm.expect(body.code).to.match(/^[1-9][0-9]{5}$/);",
+              "  pm.collectionVariables.set('code', body.code);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-Demo-User", "value": "{{host}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"question_set_id\": 1\n}"
+        },
+        "url": "{{baseUrl}}/sessions"
+      }
+    },
+    {
+      "name": "15. Join game - POST /sessions/{{code}}/players as player 1",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201 and rejoined is false', function () {",
+              "  pm.response.to.have.status(201);",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.rejoined).to.eql(false);",
+              "  pm.collectionVariables.set('playerId', body.player_id);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-Demo-User", "value": "{{player}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nickname\": \"BookRunner\"\n}"
+        },
+        "url": "{{baseUrl}}/sessions/{{code}}/players"
+      }
+    },
+    {
+      "name": "16. Rejoin game - POST /sessions/{{code}}/players again as player 1",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200, same player_id, rejoined is true', function () {",
+              "  pm.response.to.have.status(200);",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.rejoined).to.eql(true);",
+              "  pm.expect(body.player_id).to.eql(pm.collectionVariables.get('playerId'));",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-Demo-User", "value": "{{player}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nickname\": \"BookRunner\"\n}"
+        },
+        "url": "{{baseUrl}}/sessions/{{code}}/players"
+      }
+    },
+    {
+      "name": "17. Nickname taken - POST /sessions/{{code}}/players with same nickname as player 2",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 409 NICKNAME_TAKEN', function () {",
+              "  pm.response.to.have.status(409);",
+              "  pm.expect(pm.response.json().error.code).to.eql('NICKNAME_TAKEN');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-Demo-User", "value": "2099-1002" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nickname\": \"BookRunner\"\n}"
+        },
+        "url": "{{baseUrl}}/sessions/{{code}}/players"
+      }
+    },
+    {
+      "name": "18. Start running - PATCH /sessions/{{code}} to ACTIVE as host",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200 and session status is ACTIVE', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().status).to.eql('ACTIVE');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-Demo-User", "value": "{{host}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"ACTIVE\"\n}"
+        },
+        "url": "{{baseUrl}}/sessions/{{code}}"
+      }
+    },
+    {
+      "name": "19. Too late to join - POST /sessions/{{code}}/players as player 2",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 409 SESSION_NOT_JOINABLE', function () {",
+              "  pm.response.to.have.status(409);",
+              "  pm.expect(pm.response.json().error.code).to.eql('SESSION_NOT_JOINABLE');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-Demo-User", "value": "2099-1002" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nickname\": \"LateReader\"\n}"
+        },
+        "url": "{{baseUrl}}/sessions/{{code}}/players"
+      }
+    },
+    {
+      "name": "20. Rejoin running game - POST /sessions/{{code}}/players as player 1",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200 and returning player is let back in', function () {",
+              "  pm.response.to.have.status(200);",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.rejoined).to.eql(true);",
+              "  pm.expect(body.session.status).to.eql('ACTIVE');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-Demo-User", "value": "{{player}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nickname\": \"BookRunner\"\n}"
+        },
+        "url": "{{baseUrl}}/sessions/{{code}}/players"
+      }
+    },
+    {
+      "name": "21. End game - PATCH /sessions/{{code}} to FINISHED as host",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200 and session status is FINISHED', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().status).to.eql('FINISHED');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-Demo-User", "value": "{{host}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"FINISHED\"\n}"
+        },
+        "url": "{{baseUrl}}/sessions/{{code}}"
+      }
+    },
+    {
+      "name": "22. Cannot reopen finished game - PATCH /sessions/{{code}} to ACTIVE as host",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 409 INVALID_STATUS_CHANGE', function () {",
+              "  pm.response.to.have.status(409);",
+              "  pm.expect(pm.response.json().error.code).to.eql('INVALID_STATUS_CHANGE');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-Demo-User", "value": "{{host}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"ACTIVE\"\n}"
+        },
+        "url": "{{baseUrl}}/sessions/{{code}}"
+      }
+    },
+    {
+      "name": "23. List players - GET /sessions/{{code}}/players",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200 and returns player list', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json()).to.be.an('array');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/sessions/{{code}}/players"
       }
     }
   ]

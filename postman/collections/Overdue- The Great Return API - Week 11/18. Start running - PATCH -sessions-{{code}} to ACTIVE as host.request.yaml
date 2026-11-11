@@ -1,0 +1,23 @@
+$kind: http-request
+name: 18. Start running - PATCH /sessions/{{code}} to ACTIVE as host
+url: "{{baseUrl}}/sessions/{{code}}"
+method: PATCH
+headers:
+  Content-Type: application/json
+  X-Demo-User: "{{host}}"
+body:
+  type: text
+  content: |-
+    {
+      "status": "ACTIVE"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('status is 200 and session status is ACTIVE', function () {
+        pm.response.to.have.status(200);
+        pm.expect(pm.response.json().status).to.eql('ACTIVE');
+      });
+    language: text/javascript
+order: 18000
+
