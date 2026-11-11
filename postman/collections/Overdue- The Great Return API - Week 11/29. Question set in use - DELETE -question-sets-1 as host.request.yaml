@@ -1,5 +1,5 @@
 $kind: http-request
-name: 24. Question set in use - DELETE /question-sets/1 as host
+name: 29. Question set in use - DELETE /question-sets/1 as host
 url: "{{baseUrl}}/question-sets/1"
 method: DELETE
 headers:
@@ -12,5 +12,5 @@ scripts:
         pm.expect(pm.response.json().error.code).to.eql('QUESTION_SET_IN_USE');
       });
     language: text/javascript
-order: 24000
+order: 29000
 

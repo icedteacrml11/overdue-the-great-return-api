@@ -1,0 +1,23 @@
+$kind: http-request
+name: 15. A player tries to start a game - POST /sessions
+url: "{{baseUrl}}/sessions"
+method: POST
+headers:
+  Content-Type: application/json
+  X-Demo-User: "{{player}}"
+body:
+  type: text
+  content: |-
+    {
+      "question_set_id": 1
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('status is 403 FORBIDDEN', function () {
+        pm.response.to.have.status(403);
+        pm.expect(pm.response.json().error.code).to.eql('FORBIDDEN');
+      });
+    language: text/javascript
+order: 15000
+

@@ -1,5 +1,5 @@
 $kind: http-request
-name: 14. Start game - POST /sessions as host
+name: 14. A host starts a game - POST /sessions
 url: "{{baseUrl}}/sessions"
 method: POST
 headers:
@@ -19,8 +19,7 @@ scripts:
         const body = pm.response.json();
         pm.expect(body.status).to.eql('LOBBY');
         pm.expect(body.code).to.match(/^[1-9][0-9]{5}$/);
-        pm.collectionVariables.set('code', body.code);
-        pm.collectionVariables.set('player2', '2099-1002');
+        pm.collectionVariables.set("code", pm.response.json().code);
       });
     language: text/javascript
 order: 14000

@@ -1,5 +1,5 @@
 $kind: http-request
-name: 19. Too late to join - POST /sessions/{{code}}/players as player 2
+name: 21. A second player takes a used nickname - POST /sessions/{{code}}/players
 url: "{{baseUrl}}/sessions/{{code}}/players"
 method: POST
 headers:
@@ -9,15 +9,15 @@ body:
   type: text
   content: |-
     {
-      "nickname": "LateReader"
+      "nickname": "BookRunner"
     }
 scripts:
   - type: afterResponse
     code: |-
-      pm.test('status is 409 SESSION_NOT_JOINABLE', function () {
+      pm.test('status is 409 NICKNAME_TAKEN', function () {
         pm.response.to.have.status(409);
-        pm.expect(pm.response.json().error.code).to.eql('SESSION_NOT_JOINABLE');
+        pm.expect(pm.response.json().error.code).to.eql('NICKNAME_TAKEN');
       });
     language: text/javascript
-order: 19000
+order: 21000
 

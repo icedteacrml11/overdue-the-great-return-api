@@ -1,10 +1,6 @@
 $kind: http-request
 url: "{{baseUrl}}/question-sets"
 method: GET
-headers:
-  - key: X-Demo-User
-    value: "{{host}}"
-    disabled: true
 scripts:
   - type: afterResponse
     code: |-

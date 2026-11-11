@@ -1,5 +1,5 @@
 $kind: http-request
-name: 18. Start running - PATCH /sessions/{{code}} to ACTIVE as host
+name: 23. The host starts the game - PATCH /sessions/{{code}}
 url: "{{baseUrl}}/sessions/{{code}}"
 method: PATCH
 headers:
@@ -19,5 +19,5 @@ scripts:
         pm.expect(pm.response.json().status).to.eql('ACTIVE');
       });
     language: text/javascript
-order: 18000
+order: 23000
 

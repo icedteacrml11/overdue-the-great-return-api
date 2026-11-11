@@ -1,5 +1,5 @@
 $kind: http-request
-name: 21. End game - PATCH /sessions/{{code}} to FINISHED as host
+name: 26. The host ends the game - PATCH /sessions/{{code}}
 url: "{{baseUrl}}/sessions/{{code}}"
 method: PATCH
 headers:
@@ -19,5 +19,5 @@ scripts:
         pm.expect(pm.response.json().status).to.eql('FINISHED');
       });
     language: text/javascript
-order: 21000
+order: 26000
 
