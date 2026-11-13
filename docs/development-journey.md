@@ -49,6 +49,15 @@ One entry per milestone, written the week you did it. Newest at the bottom.
 - What I would explain to a classmate: The difference between a unit test (which uses `jest.mock(...)` to replace repositories and test pure business logic like `pointsFor` in milliseconds without touching PostgreSQL) and an HTTP test (which uses `supertest` to send a real request through middleware, validators, controllers, services, and repositories against `<DB_NAME>_test`).
 
 ## M5 · API documentation and deployment
+- Dates worked: Nov 14, 2026 · Time spent: 3 hours
+- Goal: Document every endpoint in OpenAPI 3, serve it with Swagger UI, and deploy the API and its PostgreSQL database to Render with the Blueprint in `render.yaml`.
+- What I built: mounted `src/routes/docs.routes.js` in `src/routes/index.js` before `currentUser` (`GET /api/v1/openapi.json` and Swagger UI at `/api/v1/docs/`); wrote `src/docs/openapi.yaml` with reusable schemas (`User`, `QuestionSet`, `Question`, `Choice`, `PublicQuestion`, `Session`, `Meta`, `Error`), shared path parameters and error responses, and 26 documented operations across the Hub Contract, Accounts, Question Sets and Sessions tags; turned on `tests/api/docs.api.test.js` (33 Jest tests in 9 files).
+- Evidence: `feature/api-docs` PR
+- Problem I hit: The kit's starter spec had lines that YAML read as keys with null values (`oldest first: null`, `the same answer for an unknown school ID and a wrong password: null`) because a description ran onto a second line, and my `/results` error was documented as `VALIDATION_FAILED` even though the controller answers `400 INVALID_SINCE`.
+- How I solved it: Rewrote those descriptions on one line, then compared every documented response against the controller's `toJson` and the error codes in the services, validators and `constraint-map.js`, so Swagger shows exactly what the API sends.
+- Decision I made and why: Documented `PublicQuestion`/`PublicChoice` as separate schemas without `is_correct`, so anyone reading the docs can see that players never receive the answer key, while hosts' `Question`/`Choice` schemas include it.
+- Changes to my design set: No endpoint changed. The docs routes are new and open to everyone, like the Hub Contract endpoints.
+- What I would explain to a classmate: `components` holds a schema or response once and every path points to it with `$ref`, so changing the `Error` shape in one place updates all 26 operations; and the `bearerAuth` security scheme is what makes Swagger's Authorize button send `Authorization: Bearer <token>`.
 
 ## M6 · The SE1 portfolio and the release
 
