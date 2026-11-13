@@ -19,6 +19,18 @@ function findById(id, options = {}) {
   });
 }
 
+function findBySetAndPosition(questionSetId, position) {
+  return Question.findOne({
+    where: { question_set_id: questionSetId, position },
+    include: [{ model: Choice, as: 'choices' }],
+    order: [[{ model: Choice, as: 'choices' }, 'position', 'ASC']],
+  });
+}
+
+function countBySetId(questionSetId) {
+  return Question.count({ where: { question_set_id: questionSetId } });
+}
+
 async function nextPosition(questionSetId, transaction) {
   const max = await Question.max('position', {
     where: { question_set_id: questionSetId },
@@ -86,6 +98,8 @@ function remove(question) {
 module.exports = {
   findAllBySetId,
   findById,
+  findBySetAndPosition,
+  countBySetId,
   createWithChoices,
   updateWithChoices,
   remove,

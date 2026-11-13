@@ -1,4 +1,4 @@
-const { body, param } = require('express-validator');
+const { body, param, query } = require('express-validator');
 
 // Hub Contract rule 5: a join code is six digits and does not start with 0.
 const codeParam = param('code')
@@ -14,7 +14,20 @@ const createRules = [
 
 const statusRules = [
   codeParam,
-  body('status').isIn(['ACTIVE', 'FINISHED']).withMessage('status must be ACTIVE or FINISHED'),
+  body('status')
+    .optional()
+    .isIn(['ACTIVE', 'RUNNING', 'FINISHED']).withMessage('status must be ACTIVE, RUNNING, or FINISHED'),
+  body('current_position')
+    .optional()
+    .isInt({ min: 1 }).withMessage('current_position must be a positive whole number')
+    .toInt(),
+  body().custom((value) => {
+    const sent = Object.keys(value || {});
+    if (!sent.some((k) => ['status', 'current_position'].includes(k))) {
+      throw new Error('send status or current_position');
+    }
+    return true;
+  }),
 ];
 
 const joinRules = [ // nickname VARCHAR(30) NOT NULL
@@ -28,4 +41,26 @@ const joinRules = [ // nickname VARCHAR(30) NOT NULL
     .isLength({ min: 2, max: 30 }).withMessage('nickname must be 2 to 30 characters long'),
 ];
 
-module.exports = { codeParam, createRules, statusRules, joinRules };
+const answerRules = [
+  codeParam,
+  body('question_id')
+    .exists().withMessage('question_id is required')
+    .bail()
+    .isInt({ min: 1 }).withMessage('question_id must be a positive whole number')
+    .toInt(),
+  body('choice_id')
+    .exists().withMessage('choice_id is required')
+    .bail()
+    .isInt({ min: 1 }).withMessage('choice_id must be a positive whole number')
+    .toInt(),
+];
+
+const leaderboardRules = [
+  codeParam,
+  query('limit')
+    .optional()
+    .isInt({ min: 1, max: 60 }).withMessage('limit must be 1 to 60')
+    .toInt(),
+];
+
+module.exports = { codeParam, createRules, statusRules, joinRules, answerRules, leaderboardRules };

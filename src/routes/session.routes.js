@@ -15,4 +15,9 @@ router.patch('/:code', requireUser('HOST', 'ADMIN'), rules.statusRules, validate
 router.post('/:code/players', requireUser(), rules.joinRules, validate, playerController.join);
 router.get('/:code/players', rules.codeParam, validate, playerController.list);
 
+// Gameplay endpoints (Milestone 3)
+router.get('/:code/question', rules.codeParam, validate, sessionController.getCurrentQuestion);
+router.post('/:code/answers', requireUser(), rules.answerRules, validate, sessionController.submitAnswer);
+router.get('/:code/leaderboard', rules.leaderboardRules, validate, sessionController.getLeaderboard);
+
 module.exports = router;

@@ -41,4 +41,9 @@ module.exports = {
     code: 'JOIN_CODE_TAKEN',
     message: 'That join code is already in use.',
   },
+  uq_one_answer: {
+    status: 409,
+    code: 'ALREADY_ANSWERED',
+    message: 'You have already answered this question.',
+  },
 };

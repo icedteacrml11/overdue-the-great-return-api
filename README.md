@@ -102,15 +102,25 @@ Base URL: `http://localhost:3001/api/v1`
 | PATCH | /question-sets/:id/questions/:questionId | The owner host or admin | Updates a question and/or replaces its choices in an unused question set | 200 |
 | DELETE | /question-sets/:id/questions/:questionId | The owner host or admin | Deletes a question from an unused question set | 204 |
 
-### Module 2: Sessions and Players
+### Module 2: Sessions, Players, and Gameplay
 
 | Verb | URL | Who may call it | What it does | Success |
 |---|---|---|---|---|
 | POST | /sessions | A host or admin | Starts a game in `LOBBY` status. The server generates the six-digit `code`. | 201 |
 | GET | /sessions/:code | Anyone | Reads one game session by its six-digit code | 200 |
-| PATCH | /sessions/:code | The host of that game (or admin) | Changes the session status (`LOBBY` → `ACTIVE` → `FINISHED`) | 200 |
+| PATCH | /sessions/:code | The host of that game (or admin) | Changes the session status (`LOBBY` → `ACTIVE`/`RUNNING` → `FINISHED`) or advances `current_position` | 200 |
 | POST | /sessions/:code/players | Any account | Joins a game in `LOBBY` (`201`) or rejoins an existing seat (`200`) | 201 / 200 |
 | GET | /sessions/:code/players | Anyone | Lists nicknames, scores, and distance progress for a game session | 200 |
+| GET | /sessions/:code/question | Anyone | Reads the current question and its choices (never exposes `is_correct`) | 200 |
+| POST | /sessions/:code/answers | A seated player | Submits an answer to the current question; awards time-based points and increments distance inside a transaction | 201 |
+| GET | /sessions/:code/leaderboard | Anyone | Returns the session leaderboard (`?limit=10`), with ties sharing a rank (`1, 2, 2, 4`) | 200 |
+
+## Scoring formula
+
+Server-side scoring (`pointsFor(question, isCorrect, elapsedMs)`):
+- Base score: `1000` points per question, time limit `limit = time_limit_seconds * 1000` ms.
+- Wrong or late (`elapsedMs > limit`) answers receive `0` points.
+- Correct answers within the time limit receive `round(1000 * (1 - elapsedMs / (2 * limit)))` points (for example, answering a 20 s question in 10 s awards `750` points) and advance `distance_progress` by 1 book returned (up to 10).
 
 ## What "completed" means in my game
 
