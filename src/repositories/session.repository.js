@@ -12,5 +12,9 @@ function update(session, changes) {
   return session.update(changes);
 }
 
-module.exports = { findByCode, create, update };
+function countByQuestionSet(questionSetId) {
+  return Session.count({ where: { question_set_id: questionSetId } });
+}
+
+module.exports = { findByCode, create, update, countByQuestionSet };
 
