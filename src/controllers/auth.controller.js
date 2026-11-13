@@ -40,7 +40,7 @@ async function listUsers(req, res) {
 async function changeRole(req, res) {
   const { id } = matchedData(req, { locations: ['params'] });
   const { role } = matchedData(req, { locations: ['body'] });
-  const user = await authService.changeRole(id, role);
+  const user = await authService.changeRole(id, role, req.user);
   res.status(200).json({ user: toUserJson(user) });
 }
 

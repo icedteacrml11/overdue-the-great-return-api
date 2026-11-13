@@ -2,7 +2,7 @@ const env = require('../config/env');
 const password = require('../security/password');
 const token = require('../security/token');
 const userRepository = require('../repositories/user.repository');
-const { unauthorized, notFound } = require('../errors/app-error');
+const { unauthorized, notFound, conflict } = require('../errors/app-error');
 
 async function register(data) {
   const passwordHash = await password.hash(data.password);
@@ -34,7 +34,10 @@ async function listUsers() {
   return userRepository.findAll();
 }
 
-async function changeRole(id, role) {
+async function changeRole(id, role, actor) {
+  if (actor && Number(actor.user_id) === Number(id)) {
+    throw conflict('SELF_ROLE_CHANGE', 'An admin cannot change their own role.');
+  }
   const account = await userRepository.findById(id);
   if (!account) throw notFound('USER_NOT_FOUND', `No user with id ${id}.`);
   return userRepository.update(account, { role });

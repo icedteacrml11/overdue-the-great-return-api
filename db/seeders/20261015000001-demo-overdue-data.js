@@ -1,25 +1,16 @@
-const bcrypt = require('bcryptjs');
-
 module.exports = {
   async up(queryInterface) {
     const db = queryInterface.sequelize;
-    const demoHash = await bcrypt.hash('Aklat-Demo-2026', 10);
     const [[existing]] = await db.query("SELECT user_id FROM users WHERE school_id = '2099-0001'");
-    if (existing) {
-      await db.query(
-        'UPDATE users SET password_hash = :demoHash WHERE password_hash IS NULL',
-        { replacements: { demoHash } }
-      );
-      return;
-    }
+    if (existing) return;
 
     await queryInterface.bulkInsert('users', [
-      { school_id: '2099-0001', full_name: 'Librarian Clara Reyes', email: 'clara@overdue.test', role: 'HOST', password_hash: demoHash, created_at: new Date() },
-      { school_id: '2099-0002', full_name: 'Admin Mateo Cruz', email: 'mateo@overdue.test', role: 'ADMIN', password_hash: demoHash, created_at: new Date() },
-      { school_id: '2099-1001', full_name: 'Rina Santos', email: 'rina@overdue.test', role: 'PLAYER', password_hash: demoHash, created_at: new Date() },
-      { school_id: '2099-1002', full_name: 'Dale Mendoza', email: 'dale@overdue.test', role: 'PLAYER', password_hash: demoHash, created_at: new Date() },
-      { school_id: '2099-1003', full_name: 'Pao Villanueva', email: 'pao@overdue.test', role: 'PLAYER', password_hash: demoHash, created_at: new Date() },
-      { school_id: '2099-1004', full_name: 'Bea Bautista', email: 'bea@overdue.test', role: 'PLAYER', password_hash: demoHash, created_at: new Date() },
+      { school_id: '2099-0001', full_name: 'Librarian Clara Reyes', email: 'clara@overdue.test', role: 'HOST', created_at: new Date() },
+      { school_id: '2099-0002', full_name: 'Admin Mateo Cruz', email: 'mateo@overdue.test', role: 'ADMIN', created_at: new Date() },
+      { school_id: '2099-1001', full_name: 'Rina Santos', email: 'rina@overdue.test', role: 'PLAYER', created_at: new Date() },
+      { school_id: '2099-1002', full_name: 'Dale Mendoza', email: 'dale@overdue.test', role: 'PLAYER', created_at: new Date() },
+      { school_id: '2099-1003', full_name: 'Pao Villanueva', email: 'pao@overdue.test', role: 'PLAYER', created_at: new Date() },
+      { school_id: '2099-1004', full_name: 'Bea Bautista', email: 'bea@overdue.test', role: 'PLAYER', created_at: new Date() },
     ]);
     const [[host]] = await db.query("SELECT user_id FROM users WHERE school_id = '2099-0001'");
     const [[rina]] = await db.query("SELECT user_id FROM users WHERE school_id = '2099-1001'");

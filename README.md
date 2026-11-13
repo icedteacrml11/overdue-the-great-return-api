@@ -51,6 +51,20 @@ npm run dev
 | JWT_EXPIRES_IN | 1h | Lifetime of issued JWT login tokens. |
 | CORS_ORIGINS | http://localhost:5173 | Comma-separated list of browser origins allowed to call the API. |
 
+## Demo accounts
+
+All seeded accounts share the demo password **`Aklat-Demo-2026`**:
+
+| School ID | Name | Role |
+|---|---|---|
+| `2099-0001` | Librarian Clara Reyes | `HOST` |
+| `2099-0099` | Ben Castro | `HOST` |
+| `2099-0002` | Admin Mateo Cruz | `ADMIN` |
+| `2099-1001` | Rina Santos | `PLAYER` |
+| `2099-1002` | Dale Mendoza | `PLAYER` |
+| `2099-1003` | Pao Villanueva | `PLAYER` |
+| `2099-1004` | Bea Bautista | `PLAYER` |
+
 ## Endpoints
 
 Base URL: `http://localhost:3001/api/v1`
