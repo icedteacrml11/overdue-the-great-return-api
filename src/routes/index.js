@@ -9,6 +9,9 @@ router.use('/health', require('./health.routes'));
 router.use('/game-info', require('./game-info.routes'));
 router.use('/results', require('./results.routes'));
 
+// Week 15: GET /openapi.json and Swagger UI at /docs/ (open to everyone, before currentUser).
+router.use(require('./docs.routes'));
+
 // From here on, req.user says who is calling (or null).
 router.use(currentUser);
 router.use('/auth', require('./auth.routes'));

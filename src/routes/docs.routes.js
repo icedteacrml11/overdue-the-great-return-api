@@ -14,6 +14,6 @@ spec.info.version = pkg.version;       // one version number, kept in package.js
 
 const router = Router();
 router.get('/openapi.json', (req, res) => res.json(spec));
-router.use('/docs', swaggerUi.serve, swaggerUi.setup(spec, { customSiteTitle: 'AklatArena API docs' }));
+router.use('/docs', swaggerUi.serve, swaggerUi.setup(spec, { customSiteTitle: 'Overdue: The Great Return API docs' }));
 
 module.exports = router;
