@@ -1,6 +1,8 @@
 // Builds the Express app. Does NOT start listening - server.js does that.
 const path = require('path');
 const express = require('express');
+const helmet = require('helmet');
+const cors = require('cors');
 const morgan = require('morgan');
 const env = require('./config/env');
 const routes = require('./routes');
@@ -10,6 +12,13 @@ const errorHandler = require('./middlewares/error-handler');
 const app = express();
 
 // Middleware runs in this order for every request.
+app.set('trust proxy', 1);
+app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+app.use(
+  cors({
+    origin: (origin, done) => done(null, !origin || env.corsOrigins.includes(origin)),
+  })
+);
 if (env.nodeEnv !== 'test') app.use(morgan('dev'));   // 1. one log line per request
 app.use(express.json());                              // 2. turn the JSON body into req.body
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));

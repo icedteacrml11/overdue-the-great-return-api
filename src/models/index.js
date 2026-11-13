@@ -4,12 +4,14 @@ const { Sequelize, DataTypes } = require('sequelize');
 const env = require('../config/env');
 const dbConfig = require('../config/database')[env.nodeEnv];
 
-const sequelize = new Sequelize(
-  dbConfig.database,
-  dbConfig.username,
-  dbConfig.password,
-  dbConfig
-);
+const sequelize = env.db.url
+  ? new Sequelize(env.db.url, dbConfig)
+  : new Sequelize(
+      dbConfig.database,
+      dbConfig.username,
+      dbConfig.password,
+      dbConfig
+    );
 
 // Week 11: load your models here, one line each, then add their associations.
 // Example:

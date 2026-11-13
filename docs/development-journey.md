@@ -38,6 +38,15 @@ One entry per milestone, written the week you did it. Newest at the bottom.
 - What I would explain to a classmate: Why `seat.increment('score', { by: points, transaction: t })` inside a database transaction is safer than reading `seat.score` in JavaScript and writing `seat.score + points` — `increment` adds atomically in PostgreSQL so concurrent updates never overwrite each other.
 
 ## M4 · Automated tests and server preparation
+- Dates worked: Nov 14, 2026 · Time spent: 3 hours
+- Goal: Build an automated Jest unit and Supertest HTTP test suite with 60%+ line coverage and prepare the Express server and database configuration for cloud deployment on Render.
+- What I built: Unit test suites (`tests/unit/gameplay.service.test.js`, `tests/unit/auth.service.test.js`, `tests/unit/question-set.service.test.js`) with `jest.mock`, HTTP test suites (`tests/api/auth.api.test.js`, `tests/api/question-sets.api.test.js`, `tests/api/sessions.api.test.js`) with `supertest`, CORS and Helmet security middleware in `src/app.js`, `DATABASE_URL` and `DB_SSL` support in `src/config/env.js`, `src/config/database.js`, and `src/models/index.js`, `"start:render"` / `"test"` / `"test:coverage"` scripts in `package.json`, and updated `render.yaml`.
+- Evidence: `feature/tests` PR · 31 Jest tests across 8 test suites (90%+ line coverage)
+- Problem I hit: Running multiple `supertest` files in Jest caused open database handle warnings when each file imported `src/models/index.js` in its own Jest module registry without closing its Sequelize connection pool.
+- How I solved it: Added `afterAll(() => sequelize.close())` to every HTTP test suite in `tests/api/` and ran Jest sequentially with `--runInBand` so the shared `<DB_NAME>_test` database has no cross-file race conditions.
+- Decision I made and why: Configured `start:render` to run `sequelize-cli db:migrate && node scripts/create-admin.js && node src/server.js` without running `db:seed:all` in production, so demo accounts with known passwords are never created on the public server.
+- Changes to my design set: Added `trust proxy`, `helmet`, and origin-allowlisted `cors` middleware to `src/app.js`, and added `DATABASE_URL` / `DB_SSL` connection support to `src/config/env.js` and `src/config/database.js`.
+- What I would explain to a classmate: The difference between a unit test (which uses `jest.mock(...)` to replace repositories and test pure business logic like `pointsFor` in milliseconds without touching PostgreSQL) and an HTTP test (which uses `supertest` to send a real request through middleware, validators, controllers, services, and repositories against `<DB_NAME>_test`).
 
 ## M5 · API documentation and deployment
 

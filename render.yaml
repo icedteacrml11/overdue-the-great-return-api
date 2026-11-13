@@ -3,7 +3,7 @@
 # Change the two "name" values: they become part of your public address.
 services:
   - type: web
-    name: CHANGE-ME-yourgame-yourname
+    name: overdue-the-great-return-orlina
     runtime: node
     plan: free
     region: singapore
@@ -13,9 +13,11 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: DB_SSL
+        value: "true"
       - key: DATABASE_URL
         fromDatabase:
-          name: CHANGE-ME-yourgame-yourname-db
+          name: overdue-the-great-return-orlina-db
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
@@ -32,8 +34,8 @@ services:
         sync: false
 
 databases:
-  - name: CHANGE-ME-yourgame-yourname-db
+  - name: overdue-the-great-return-orlina-db
     plan: free
     region: singapore
-    databaseName: CHANGE_ME_your_game_slug
+    databaseName: overdue_the_great_return
     ipAllowList: []          # only services inside Render may connect

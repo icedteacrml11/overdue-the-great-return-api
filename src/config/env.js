@@ -1,7 +1,12 @@
 // Loads .env once and fails fast when a required key is missing.
 require('dotenv').config({ quiet: true });
 
-const REQUIRED = ['DB_HOST', 'DB_PORT', 'DB_NAME', 'DB_USER', 'DB_PASSWORD', 'HUB_API_KEY', 'JWT_SECRET', 'CORS_ORIGINS'];
+const REQUIRED = [
+  ...(process.env.DATABASE_URL ? [] : ['DB_HOST', 'DB_PORT', 'DB_NAME', 'DB_USER', 'DB_PASSWORD']),
+  'HUB_API_KEY',
+  'JWT_SECRET',
+  'CORS_ORIGINS',
+];
 const missing = REQUIRED.filter((key) => !process.env[key]);
 
 if (missing.length > 0) {
@@ -24,6 +29,8 @@ module.exports = {
   },
   corsOrigins: (process.env.CORS_ORIGINS || '').split(',').map((o) => o.trim()).filter(Boolean),
   db: {
+    url: process.env.DATABASE_URL || null,
+    ssl: process.env.DB_SSL === 'true',
     host: process.env.DB_HOST,
     port: Number(process.env.DB_PORT),
     name: nodeEnv === 'test' ? `${process.env.DB_NAME}_test` : process.env.DB_NAME,
