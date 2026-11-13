@@ -87,15 +87,20 @@ Base URL: `http://localhost:3001/api/v1`
 | GET | /users | An admin | Lists all user accounts | 200 |
 | PATCH | /users/:id/role | An admin | Changes a user's role (`PLAYER`, `HOST`, `ADMIN`) | 200 |
 
-### Module 1: Question Sets
+### Module 1: Question Sets and Question Bank
 
 | Verb | URL | Who may call it | What it does | Success |
 |---|---|---|---|---|
-| GET | /question-sets | A host or admin | Lists the caller's question sets (or all sets for an admin) | 200 |
+| GET | /question-sets | A host or admin | Lists question sets with pagination (`?page=&limit=`), sort (`?sort=&order=`), and search (`?q=`) | 200 |
 | POST | /question-sets | A host or admin | Creates a new question set owned by the caller | 201 |
-| GET | /question-sets/:id | The owner host or admin | Reads one question set by its id | 200 |
-| PATCH | /question-sets/:id | The owner host or admin | Updates a question set's title | 200 |
+| GET | /question-sets/:id | The owner host or admin | Reads one question set (supports `?include=questions` for eager-loaded questions and choices) | 200 |
+| PATCH | /question-sets/:id | The owner host or admin | Updates an unused question set's title (`409` if already used in a game) | 200 |
 | DELETE | /question-sets/:id | The owner host or admin | Deletes an unused question set | 204 |
+| PUT | /question-sets/:id/cover | The owner host or admin | Uploads a PNG or JPEG cover image (`<= 1 MB`) in form field `cover` | 200 |
+| GET | /question-sets/:id/questions | The owner host or admin | Lists all questions and choices in a question set ordered by position | 200 |
+| POST | /question-sets/:id/questions | The owner host or admin | Creates a question and its 2–4 choices inside a transaction (exactly 1 correct choice) | 201 |
+| PATCH | /question-sets/:id/questions/:questionId | The owner host or admin | Updates a question and/or replaces its choices in an unused question set | 200 |
+| DELETE | /question-sets/:id/questions/:questionId | The owner host or admin | Deletes a question from an unused question set | 204 |
 
 ### Module 2: Sessions and Players
 

@@ -890,6 +890,388 @@
       ]
     },
     {
+      "name": "Question bank",
+      "item": [
+        {
+          "name": "1. Paging and sort - GET /question-sets?page=1&limit=5&sort=id&order=asc",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200 with data and meta envelope', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.data).to.be.an('array');",
+                  "  pm.expect(body.meta).to.include({ page: 1, limit: 5 });",
+                  "  pm.expect(body.meta.total).to.be.a('number');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{hostToken}}" }
+            ],
+            "url": "{{baseUrl}}/question-sets?page=1&limit=5&sort=id&order=asc"
+          }
+        },
+        {
+          "name": "2. Empty search - GET /question-sets?q=zzzznotfound",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200 with empty data list', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.data).to.eql([]);",
+                  "  pm.expect(body.meta.total).to.eql(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{hostToken}}" }
+            ],
+            "url": "{{baseUrl}}/question-sets?q=zzzznotfound"
+          }
+        },
+        {
+          "name": "3. Bad sort column - GET /question-sets?sort=password_hash (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400 VALIDATION_FAILED', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "  pm.expect(pm.response.json().error.code).to.eql('VALIDATION_FAILED');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{hostToken}}" }
+            ],
+            "url": "{{baseUrl}}/question-sets?sort=password_hash"
+          }
+        },
+        {
+          "name": "4. Include questions and choices - GET /question-sets/1?include=questions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200 and includes questions with choices', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.questions).to.be.an('array').that.is.not.empty;",
+                  "  pm.expect(body.questions[0].choices).to.be.an('array').that.is.not.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{hostToken}}" }
+            ],
+            "url": "{{baseUrl}}/question-sets/1?include=questions"
+          }
+        },
+        {
+          "name": "5. Create fresh set for Question bank - POST /question-sets",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "  pm.collectionVariables.set('bankSetId', pm.response.json().id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{hostToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Campus History Bank\"\n}"
+            },
+            "url": "{{baseUrl}}/question-sets"
+          }
+        },
+        {
+          "name": "6. Create a question with choices - POST /question-sets/{{bankSetId}}/questions (201)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201 and server sets positions', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.position).to.eql(1);",
+                  "  pm.expect(body.choices.length).to.eql(4);",
+                  "  pm.collectionVariables.set('bankQuestionId', body.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{hostToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prompt_text\": \"Which town hosts the SorSU Bulan Campus?\",\n  \"question_type\": \"MULTIPLE_CHOICE\",\n  \"time_limit_seconds\": 20,\n  \"choices\": [\n    { \"choice_text\": \"Bulan\", \"is_correct\": true },\n    { \"choice_text\": \"Irosin\", \"is_correct\": false },\n    { \"choice_text\": \"Matnog\", \"is_correct\": false },\n    { \"choice_text\": \"Gubat\", \"is_correct\": false }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/question-sets/{{bankSetId}}/questions"
+          }
+        },
+        {
+          "name": "7. List questions in set - GET /question-sets/{{bankSetId}}/questions (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200 and returns 1 question', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().length).to.eql(1);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{hostToken}}" }
+            ],
+            "url": "{{baseUrl}}/question-sets/{{bankSetId}}/questions"
+          }
+        },
+        {
+          "name": "8. Two correct choices - POST /question-sets/{{bankSetId}}/questions (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400 VALIDATION_FAILED', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "  pm.expect(pm.response.json().error.code).to.eql('VALIDATION_FAILED');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{hostToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prompt_text\": \"Two correct choices test?\",\n  \"question_type\": \"TRUE_FALSE\",\n  \"choices\": [\n    { \"choice_text\": \"True\", \"is_correct\": true },\n    { \"choice_text\": \"False\", \"is_correct\": true }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/question-sets/{{bankSetId}}/questions"
+          }
+        },
+        {
+          "name": "9. Player adds a question - POST /question-sets/{{bankSetId}}/questions (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 403 FORBIDDEN', function () {",
+                  "  pm.response.to.have.status(403);",
+                  "  pm.expect(pm.response.json().error.code).to.eql('FORBIDDEN');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{playerToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prompt_text\": \"Player sneaky question?\",\n  \"choices\": [\n    { \"choice_text\": \"Yes\", \"is_correct\": true },\n    { \"choice_text\": \"No\", \"is_correct\": false }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/question-sets/{{bankSetId}}/questions"
+          }
+        },
+        {
+          "name": "10. Edit a set in use - POST /question-sets/1/questions (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 409 QUESTION_SET_IN_USE', function () {",
+                  "  pm.response.to.have.status(409);",
+                  "  pm.expect(pm.response.json().error.code).to.eql('QUESTION_SET_IN_USE');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{hostToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prompt_text\": \"Can we edit a set already used in a game?\",\n  \"choices\": [\n    { \"choice_text\": \"Yes\", \"is_correct\": true },\n    { \"choice_text\": \"No\", \"is_correct\": false }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/question-sets/1/questions"
+          }
+        },
+        {
+          "name": "11. Good cover upload - PUT /question-sets/{{bankSetId}}/cover (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200 and sets cover_url', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().cover_url).to.match(/^\\/uploads\\/covers\\/set-/);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{hostToken}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "cover",
+                  "type": "file",
+                  "src": "postman/fixtures/cover.png"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/question-sets/{{bankSetId}}/cover"
+          }
+        },
+        {
+          "name": "12. Wrong file type upload - PUT /question-sets/{{bankSetId}}/cover (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400 INVALID_FILE_TYPE', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "  pm.expect(pm.response.json().error.code).to.eql('INVALID_FILE_TYPE');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{hostToken}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "cover",
+                  "type": "file",
+                  "src": "postman/fixtures/not-a-picture.txt"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/question-sets/{{bankSetId}}/cover"
+          }
+        },
+        {
+          "name": "13. Too big upload - PUT /question-sets/{{bankSetId}}/cover (413)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 413 FILE_TOO_LARGE', function () {",
+                  "  pm.response.to.have.status(413);",
+                  "  pm.expect(pm.response.json().error.code).to.eql('FILE_TOO_LARGE');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{hostToken}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "cover",
+                  "type": "file",
+                  "src": "postman/fixtures/too-big.png"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/question-sets/{{bankSetId}}/cover"
+          }
+        }
+      ]
+    },
+    {
       "name": "2. Sessions and Players",
       "item": [
         {
