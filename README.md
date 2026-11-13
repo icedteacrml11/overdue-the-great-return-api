@@ -136,6 +136,18 @@ A player has completed the game when they reach a distance progress of 10 by ans
 - `session_players` — Session participants tracking seat assignment, nickname, cumulative score, and distance progress (0–10 books returned).
 - `player_answers` — Recorded player answers per question with response time, chosen option, correctness, and points earned.
 
+## How to run the tests
+
+ Automated unit tests (`tests/unit/`, using `jest.mock`) and HTTP integration tests (`tests/api/`, using `supertest`) run against an isolated test database (`<DB_NAME>_test`) that is automatically created, wiped, migrated, and seeded before every run (`tests/setup/global-setup.js`). Your development database is never modified.
+
+```bash
+# Run all unit and HTTP integration tests in band
+npm test
+
+# Run tests with line, statement, function, and branch coverage
+npm run test:coverage
+```
+
 ## Database scripts
 
 | Command | What it does |
