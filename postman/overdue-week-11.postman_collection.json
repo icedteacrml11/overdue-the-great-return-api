@@ -5,6 +5,7 @@
   },
   "variable": [
     { "key": "baseUrl", "value": "http://localhost:3001/api/v1" },
+    { "key": "hubKey", "value": "dev-hub-key" },
     { "key": "host", "value": "2099-0001" },
     { "key": "otherHost", "value": "2099-0099" },
     { "key": "player", "value": "2099-1001" },
@@ -1712,6 +1713,521 @@
               { "key": "Authorization", "value": "Bearer {{hostToken}}" }
             ],
             "url": "{{baseUrl}}/question-sets/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Play a whole game",
+      "item": [
+        {
+          "name": "1. Add a second question to bank set - POST /question-sets/{{bankSetId}}/questions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201 and position is 2', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "  pm.expect(pm.response.json().position).to.eql(2);",
+                  "  pm.collectionVariables.set('playSince', new Date(Date.now() - 1000).toISOString());",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{hostToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prompt_text\": \"Returning all 10 overdue books finishes the race.\",\n  \"question_type\": \"TRUE_FALSE\",\n  \"time_limit_seconds\": 20,\n  \"choices\": [\n    { \"choice_text\": \"True\", \"is_correct\": true },\n    { \"choice_text\": \"False\", \"is_correct\": false }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/question-sets/{{bankSetId}}/questions"
+          }
+        },
+        {
+          "name": "2. Host creates a game - POST /sessions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201 and LOBBY', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "  pm.collectionVariables.set('playCode', pm.response.json().code);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{hostToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question_set_id\": {{bankSetId}}\n}"
+            },
+            "url": "{{baseUrl}}/sessions"
+          }
+        },
+        {
+          "name": "3. Player 1 joins - POST /sessions/{{playCode}}/players",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{playerToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nickname\": \"ReaderOne\"\n}"
+            },
+            "url": "{{baseUrl}}/sessions/{{playCode}}/players"
+          }
+        },
+        {
+          "name": "4. Player 2 joins - POST /sessions/{{playCode}}/players",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{player2Token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nickname\": \"ReaderTwo\"\n}"
+            },
+            "url": "{{baseUrl}}/sessions/{{playCode}}/players"
+          }
+        },
+        {
+          "name": "5. Host starts the game - PATCH /sessions/{{playCode}}",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200, current_position is 1, question_started_at is set', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.current_position).to.eql(1);",
+                  "  pm.expect(body.question_started_at).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{hostToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/sessions/{{playCode}}"
+          }
+        },
+        {
+          "name": "6. Read current question 1 - GET /sessions/{{playCode}}/question",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200 and choices omit is_correct', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.position).to.eql(1);",
+                  "  pm.expect(body.choices[0].is_correct).to.be.undefined;",
+                  "  pm.collectionVariables.set('q1Id', body.id);",
+                  "  pm.collectionVariables.set('q1Choice1Id', body.choices[0].id);",
+                  "  pm.collectionVariables.set('q1Choice2Id', body.choices[1].id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/sessions/{{playCode}}/question"
+          }
+        },
+        {
+          "name": "7. Player 1 answers question 1 - POST /sessions/{{playCode}}/answers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201 and awards points', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.is_correct).to.eql(true);",
+                  "  pm.expect(body.points_awarded).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{playerToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question_id\": {{q1Id}},\n  \"choice_id\": {{q1Choice1Id}}\n}"
+            },
+            "url": "{{baseUrl}}/sessions/{{playCode}}/answers"
+          }
+        },
+        {
+          "name": "8. Answer twice - POST /sessions/{{playCode}}/answers (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 409 ALREADY_ANSWERED', function () {",
+                  "  pm.response.to.have.status(409);",
+                  "  pm.expect(pm.response.json().error.code).to.eql('ALREADY_ANSWERED');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{playerToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question_id\": {{q1Id}},\n  \"choice_id\": {{q1Choice1Id}}\n}"
+            },
+            "url": "{{baseUrl}}/sessions/{{playCode}}/answers"
+          }
+        },
+        {
+          "name": "9. Player 2 answers question 1 - POST /sessions/{{playCode}}/answers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{player2Token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question_id\": {{q1Id}},\n  \"choice_id\": {{q1Choice2Id}}\n}"
+            },
+            "url": "{{baseUrl}}/sessions/{{playCode}}/answers"
+          }
+        },
+        {
+          "name": "10. Skip a question - PATCH /sessions/{{playCode}} (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 409 NOT_NEXT_QUESTION', function () {",
+                  "  pm.response.to.have.status(409);",
+                  "  pm.expect(pm.response.json().error.code).to.eql('NOT_NEXT_QUESTION');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{hostToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"current_position\": 3\n}"
+            },
+            "url": "{{baseUrl}}/sessions/{{playCode}}"
+          }
+        },
+        {
+          "name": "11. Advance to question 2 - PATCH /sessions/{{playCode}}",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200 and current_position is 2', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().current_position).to.eql(2);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{hostToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"current_position\": 2\n}"
+            },
+            "url": "{{baseUrl}}/sessions/{{playCode}}"
+          }
+        },
+        {
+          "name": "12. Read current question 2 - GET /sessions/{{playCode}}/question",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200 and position is 2', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.position).to.eql(2);",
+                  "  pm.expect(body.choices[0].is_correct).to.be.undefined;",
+                  "  pm.collectionVariables.set('q2Id', body.id);",
+                  "  pm.collectionVariables.set('q2Choice1Id', body.choices[0].id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/sessions/{{playCode}}/question"
+          }
+        },
+        {
+          "name": "13. Player 1 answers question 2 - POST /sessions/{{playCode}}/answers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{playerToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question_id\": {{q2Id}},\n  \"choice_id\": {{q2Choice1Id}}\n}"
+            },
+            "url": "{{baseUrl}}/sessions/{{playCode}}/answers"
+          }
+        },
+        {
+          "name": "14. Player 2 answers question 2 - POST /sessions/{{playCode}}/answers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{player2Token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question_id\": {{q2Id}},\n  \"choice_id\": {{q2Choice1Id}}\n}"
+            },
+            "url": "{{baseUrl}}/sessions/{{playCode}}/answers"
+          }
+        },
+        {
+          "name": "15. Advance after last question - PATCH /sessions/{{playCode}} (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 409 NO_MORE_QUESTIONS', function () {",
+                  "  pm.response.to.have.status(409);",
+                  "  pm.expect(pm.response.json().error.code).to.eql('NO_MORE_QUESTIONS');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{hostToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"current_position\": 3\n}"
+            },
+            "url": "{{baseUrl}}/sessions/{{playCode}}"
+          }
+        },
+        {
+          "name": "16. Host closes the game - PATCH /sessions/{{playCode}}",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200 and FINISHED', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().status).to.eql('FINISHED');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{hostToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"FINISHED\"\n}"
+            },
+            "url": "{{baseUrl}}/sessions/{{playCode}}"
+          }
+        },
+        {
+          "name": "17. Read leaderboard - GET /sessions/{{playCode}}/leaderboard?limit=10",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200 and returns ranked players', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.leaderboard).to.be.an('array');",
+                  "  pm.expect(body.leaderboard[0].rank).to.eql(1);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/sessions/{{playCode}}/leaderboard?limit=10"
+          }
+        },
+        {
+          "name": "18. Hub reads results - GET /results?since={{playSince}}",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200 and lists played game with completed players', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  const games = pm.response.json().results;",
+                  "  const played = games.find(g => g.session_code === pm.collectionVariables.get('playCode'));",
+                  "  pm.expect(played).to.be.an('object');",
+                  "  pm.expect(played.players.some(p => p.completed === true)).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Hub-Key", "value": "{{hubKey}}" }
+            ],
+            "url": "{{baseUrl}}/results?since={{playSince}}"
           }
         }
       ]

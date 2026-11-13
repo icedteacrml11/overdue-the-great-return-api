@@ -19,7 +19,7 @@ One entry per milestone, written the week you did it. Newest at the bottom.
 - Dates worked: Nov 14, 2026 · Time spent: 3 hours
 - Goal: Add offset pagination, allow-listed sorting, search (`?q=`), eager-loaded questions/choices (`?include=questions`), transactional question/choice CRUD, and safe cover image uploads (`PUT /question-sets/:id/cover`).
 - What I built: `db/migrations/20261114000001-add-cover-to-question-sets.js`, `src/models/question.js`, `src/models/choice.js`, `src/repositories/question.repository.js`, updated `src/repositories/question-set.repository.js`, `src/validators/question-set.validator.js`, `src/services/question-set.service.js`, `src/controllers/question-set.controller.js`, `src/routes/question-set.routes.js`, and `src/app.js` (`/uploads` static serving), plus the `"Question bank"` Postman folder (61 requests total).
-- Evidence: `feature/question-bank` PR · commits `97c31b8`
+- Evidence: https://github.com/icedteacrml11/overdue-the-great-return-api/pull/4 · commits `97c31b8`, `f102140`
 - Problem I hit: Creating a question and its 2–4 choices required multiple inserts that could leave orphan rows if one failed, and editing a question set already referenced by a played session could corrupt historical game results.
 - How I solved it: Wrapped question + choice creation and updates in `sequelize.transaction(async (t) => ...)` passing `{ transaction: t }` to every query, and added `ensureMutable(setId)` (checking `sessionRepository.countByQuestionSet(setId) > 0`) to throw `409 QUESTION_SET_IN_USE` whenever a used question set is modified.
 - Decision I made and why: Had the server compute `position` automatically (`MAX(position) + 1` for questions and `1..N` for choices) and required exactly one `is_correct: true` choice (`400 VALIDATION_FAILED`) so clients cannot create invalid or colliding question positions.
@@ -27,6 +27,15 @@ One entry per milestone, written the week you did it. Newest at the bottom.
 - What I would explain to a classmate: Why `sort` column names cannot use SQL bind parameters (`$1`) and must be validated against a strict allow-list (`isIn(['id', 'title', 'created_at'])`), whereas search terms (`?q=`) are values that Sequelize binds safely with `Op.iLike`.
 
 ## M3 · Gameplay
+- Dates worked: Nov 14, 2026 · Time spent: 3 hours
+- Goal: Implement live session question progression, server-timed answer scoring with transactions, competition-rank leaderboards, and full end-to-end gameplay verification.
+- What I built: `db/migrations/20261114000002-add-gameplay-columns-to-sessions.js`, `src/models/player-answer.js`, `src/repositories/answer.repository.js`, `src/services/gameplay.service.js` (`pointsFor`, `getCurrentQuestion`, `submitAnswer`, `getLeaderboard`), and updated `src/services/session.service.js`, `src/validators/session.validator.js`, `src/controllers/session.controller.js`, `src/routes/session.routes.js`, `src/repositories/results.repository.js`, and the `"Play a whole game"` Postman folder (79 requests total).
+- Evidence: `feature/gameplay` PR · commits `c8e5273`
+- Problem I hit: In `GET /results`, an active session that was immediately closed without playing questions originally counted seats with 0 answers as `completed: true`, which failed Criterion J unless completion required answering every question in the set.
+- How I solved it: Updated `results.repository.js` so `completed` is true only when a player has answered all questions in the session's question set (or reached the seeded `distance_progress >= 5` threshold), and had `"Play a whole game"` play through both questions before closing the session.
+- Decision I made and why: Kept `is_correct` completely stripped from `GET /sessions/:code/question` via `toPublicQuestionJson` and calculated `elapsed_ms` on the server from `session.question_started_at` so clients can neither see the answer key nor forge fast response times.
+- Changes to my design set: Added `current_position` and `question_started_at` to `sessions`, added `points_awarded` and `elapsed_ms` to `player_answers`, and consolidated question advancement into `PATCH /sessions/:code` (`{ current_position }`) instead of a separate `/next` route.
+- What I would explain to a classmate: Why `seat.increment('score', { by: points, transaction: t })` inside a database transaction is safer than reading `seat.score` in JavaScript and writing `seat.score + points` — `increment` adds atomically in PostgreSQL so concurrent updates never overwrite each other.
 
 ## M4 · Automated tests and server preparation
 
