@@ -11,7 +11,14 @@ async function findFinishedGamePlayers(since) {
       u.school_id,
       sp.nickname,
       sp.score,
-      (sp.distance_progress >= 10 OR s.status = 'FINISHED') AS completed
+      (
+        sp.distance_progress >= 5
+        OR (
+          (SELECT COUNT(*) FROM questions q WHERE q.question_set_id = s.question_set_id) > 0
+          AND (SELECT COUNT(*) FROM player_answers pa WHERE pa.session_player_id = sp.id)
+              >= (SELECT COUNT(*) FROM questions q WHERE q.question_set_id = s.question_set_id)
+        )
+      ) AS completed
     FROM sessions s
     JOIN session_players sp ON sp.session_id = s.id
     JOIN users u ON u.user_id = sp.user_id

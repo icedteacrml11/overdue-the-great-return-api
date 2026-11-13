@@ -24,6 +24,7 @@ const Question = require('./question')(sequelize, DataTypes);
 const Choice = require('./choice')(sequelize, DataTypes);
 const Session = require('./session')(sequelize, DataTypes);
 const SessionPlayer = require('./session-player')(sequelize, DataTypes);
+const PlayerAnswer = require('./player-answer')(sequelize, DataTypes);
 
 // Associations matching your foreign keys
 User.hasMany(QuestionSet, { foreignKey: 'host_id' });
@@ -49,6 +50,15 @@ SessionPlayer.belongsTo(User, { foreignKey: 'user_id' });
 
 Session.belongsTo(SessionPlayer, { foreignKey: 'winner_player_id', as: 'winner', constraints: false });
 
+SessionPlayer.hasMany(PlayerAnswer, { foreignKey: 'session_player_id', as: 'answers' });
+PlayerAnswer.belongsTo(SessionPlayer, { foreignKey: 'session_player_id' });
+
+Question.hasMany(PlayerAnswer, { foreignKey: 'question_id' });
+PlayerAnswer.belongsTo(Question, { foreignKey: 'question_id' });
+
+Choice.hasMany(PlayerAnswer, { foreignKey: 'choice_id' });
+PlayerAnswer.belongsTo(Choice, { foreignKey: 'choice_id' });
+
 module.exports = {
   sequelize,
   Sequelize,
@@ -59,4 +69,5 @@ module.exports = {
   Choice,
   Session,
   SessionPlayer,
+  PlayerAnswer,
 };

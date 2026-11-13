@@ -7,6 +7,8 @@ module.exports = (sequelize, DataTypes) =>
       host_id: { type: DataTypes.INTEGER, allowNull: false },
       question_set_id: { type: DataTypes.INTEGER, allowNull: false },
       status: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'LOBBY' },
+      current_position: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
+      question_started_at: { type: DataTypes.DATE, allowNull: true },
       winner_player_id: { type: DataTypes.INTEGER, allowNull: true },
       started_at: { type: DataTypes.DATE, allowNull: true },
       ended_at: { type: DataTypes.DATE, allowNull: true },
