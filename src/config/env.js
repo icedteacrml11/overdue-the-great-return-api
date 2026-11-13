@@ -11,10 +11,13 @@ if (missing.length > 0) {
   );
 }
 
+const nodeEnv = process.env.NODE_ENV || 'development';
+
 module.exports = {
-  nodeEnv: process.env.NODE_ENV || 'development',
+  nodeEnv,
   port: Number(process.env.PORT) || 3001,
   hubApiKey: process.env.HUB_API_KEY,
+  bcryptRounds: Number(process.env.BCRYPT_ROUNDS) || 10,
   jwt: {
     secret: process.env.JWT_SECRET,
     expiresIn: process.env.JWT_EXPIRES_IN || '1h',
@@ -23,7 +26,7 @@ module.exports = {
   db: {
     host: process.env.DB_HOST,
     port: Number(process.env.DB_PORT),
-    name: process.env.DB_NAME,
+    name: nodeEnv === 'test' ? `${process.env.DB_NAME}_test` : process.env.DB_NAME,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
   },
