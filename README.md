@@ -47,6 +47,9 @@ npm run dev
 | DB_USER | postgres | Database user |
 | DB_PASSWORD | (your own) | Database password. Never commit this. |
 | HUB_API_KEY | dev-hub-key | Key the Library Game Hub sends to read results. The library gives the real one at deployment. |
+| JWT_SECRET | (64 hex chars) | Secret key used to sign and verify HS256 login tokens. |
+| JWT_EXPIRES_IN | 1h | Lifetime of issued JWT login tokens. |
+| CORS_ORIGINS | http://localhost:5173 | Comma-separated list of browser origins allowed to call the API. |
 
 ## Endpoints
 
@@ -59,6 +62,16 @@ Base URL: `http://localhost:3001/api/v1`
 | GET | /health | Anyone | Is the API up and can it reach the database? | 200 (503 when the database is down) |
 | GET | /game-info | Anyone | Slug, name, group, developer, description, player limits, version | 200 |
 | GET | /results | Library Game Hub (`X-Hub-Key`) | Finished games, every player, and the top 3. Optional `?since=` | 200 (401 without the key) |
+
+### Accounts and Auth
+
+| Verb | URL | Who may call it | What it does | Success |
+|---|---|---|---|---|
+| POST | /auth/register | Anyone | Creates a new `PLAYER` account with a bcrypt-hashed password | 201 |
+| POST | /auth/login | Anyone | Verifies school ID and password and returns a signed JWT (`Bearer`) | 200 |
+| GET | /auth/me | Any logged-in account | Returns the caller's current account profile | 200 |
+| GET | /users | An admin | Lists all user accounts | 200 |
+| PATCH | /users/:id/role | An admin | Changes a user's role (`PLAYER`, `HOST`, `ADMIN`) | 200 |
 
 ### Module 1: Question Sets
 
