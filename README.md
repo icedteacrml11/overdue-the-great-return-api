@@ -1,5 +1,11 @@
 # Overdue: The Great Return API
 
+![CS 313 check](https://github.com/icedteacrml11/overdue-the-great-return-api/actions/workflows/check.yml/badge.svg)
+
+Live API: https://overdue-the-great-return-orlina.onrender.com/api/v1
+
+Interactive API Docs (Swagger UI): https://overdue-the-great-return-orlina.onrender.com/api/v1/docs/
+
 Backend API for **Overdue: The Great Return**, a tournament game for the SorSU Bulan Campus library.
 CS 313 Software Engineering 1, A.Y. 2026-2027.
 
@@ -158,3 +164,18 @@ npm run test:coverage
 | npm run db:check | Counts the rows in every table |
 | npm run db:reset | Empties the database, rebuilds every table and reloads the seed data |
 | npm run check | Runs the same automatic check that GitHub runs after every push |
+
+## Deploying to Render
+
+This repository includes a Render Blueprint in `render.yaml` (`overdue-the-great-return-orlina` web service + `overdue-the-great-return-orlina-db` PostgreSQL database, deployed in Singapore).
+
+1. **Create the Blueprint on Render**: Sign in at https://render.com with GitHub, choose **New → Blueprint**, select this repository, and click **Apply**.
+2. **Enter the four `sync: false` environment variables**:
+   - `HUB_API_KEY` — Secret key checked by `X-Hub-Key` on `GET /api/v1/results`.
+   - `CORS_ORIGINS` — Comma-separated browser origins allowed by CORS (for example `http://localhost:5173`).
+   - `ADMIN_SCHOOL_ID` — School ID (`YYYY-NNNN`) for the initial production `ADMIN` account created on boot.
+   - `ADMIN_PASSWORD` — Password (12+ characters) for that `ADMIN` account (kept out of version control).
+3. **Production startup (`npm run start:render`)**: Runs `sequelize-cli db:migrate && node scripts/create-admin.js && node src/server.js`. Seeders (`db:seed:all`) are intentionally **not** run in production so demo accounts with known passwords are never created on the public server.
+4. **Verify**: Open `/api/v1/health` (`https://overdue-the-great-return-orlina.onrender.com/api/v1/health`) and verify `"database": "up"`, and explore endpoints at `/api/v1/docs/`.
+
+> **Free-tier limits:** The Render free web service sleeps after 15 minutes of inactivity (taking ~1 minute to wake on the next request), uploaded cover files on the ephemeral disk do not survive restarts, and the free PostgreSQL database created on **Nov 14, 2026** expires 30 days after creation (Dec 14, 2026).
