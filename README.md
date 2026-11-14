@@ -179,3 +179,17 @@ This repository includes a Render Blueprint in `render.yaml` (`overdue-the-great
 4. **Verify**: Open `/api/v1/health` (`https://overdue-the-great-return-orlina.onrender.com/api/v1/health`) and verify `"database": "up"`, and explore endpoints at `/api/v1/docs/`.
 
 > **Free-tier limits:** The Render free web service sleeps after 15 minutes of inactivity (taking ~1 minute to wake on the next request), uploaded cover files on the ephemeral disk do not survive restarts, and the free PostgreSQL database created on **Nov 14, 2026** expires 30 days after creation (Dec 14, 2026).
+
+## SE1 Portfolio
+
+Complete as-built documentation for CS 313 Software Engineering 1 and SE2 handoff:
+
+- [Technical Specification](docs/technical-spec.md) — System scope, 4-layer architecture, database constraints, security model, quality metrics, Render deployment, and key architectural decisions
+- [Data Dictionary](docs/data-dictionary.md) — Generated table and column reference for all 7 PostgreSQL tables
+- [API Reference](docs/api-reference.md) — Generated endpoint reference covering all 26 operations from `src/docs/openapi.yaml`
+- [User Guide](docs/user-guide.md) — Step-by-step workflows for Players, Hosts, Admins, and the Library Game Hub
+- [SE2 Handoff](docs/se2-handoff.md) — Live URL, auth/CORS rules, screen-to-endpoint map, known limits, and prioritized SE2 backlog
+- [System Diagrams](docs/diagrams/README.md) — Six exported architecture and UML diagrams (`architecture`, `erd`, `use-case`, `class`, `sequence`, `activity`)
+- [Development Journey](docs/development-journey.md) — Milestone-by-milestone engineering log (`M1`–`M6`)
+- [Changelog](CHANGELOG.md) — Release notes (`v0.1.0` through `v1.0.0`)
+
