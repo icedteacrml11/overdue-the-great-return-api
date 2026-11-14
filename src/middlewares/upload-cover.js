@@ -2,15 +2,18 @@
 // URL to fit YOUR game (a cover, an avatar, a card image ...). The three rules stay the same.
 // The rules a validator cannot check, because the file is not JSON:
 //   only PNG or JPEG, at most 1 MB, and a file name WE choose (never the client's).
+const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const multer = require('multer');
 const { badRequest, AppError } = require('../errors/app-error');
 
 const TYPES = { 'image/png': '.png', 'image/jpeg': '.jpg' };
+const COVER_DIR = path.join(__dirname, '..', '..', 'uploads', 'covers');
+fs.mkdirSync(COVER_DIR, { recursive: true });
 
 const storage = multer.diskStorage({
-  destination: path.join(__dirname, '..', '..', 'uploads', 'covers'),
+  destination: COVER_DIR,
   filename: (req, file, cb) => cb(null, `set-${req.params.id}-${crypto.randomUUID()}${TYPES[file.mimetype]}`),
 });
 
