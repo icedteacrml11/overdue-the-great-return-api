@@ -60,5 +60,14 @@ One entry per milestone, written the week you did it. Newest at the bottom.
 - What I would explain to a classmate: Why `render.yaml` with `NODE_ENV: production` causes `npm ci` to skip `devDependencies` (so tools invoked in `startCommand` like `sequelize-cli` must live in `dependencies`), how `components` and `$ref` keep Swagger documentation consistent across 26 operations, and why the free Render PostgreSQL database expires 30 days after creation while uploaded files on the free disk reset on restart.
 
 ## M6 · The SE1 portfolio and the release
+- Dates worked: Nov 14, 2026 · Time spent: 2 hours
+- Goal: Complete the as-built SE1 technical portfolio in `docs/` and `CHANGELOG.md`, generate `docs/data-dictionary.md`, `docs/api-reference.md`, and all six architecture/UML PNG diagrams, and prepare the `v1.0.0` release.
+- What I built: Added `docs:dictionary` and `docs:api` scripts to `package.json`; completed `docs/technical-spec.md`, `docs/data-dictionary.md`, `docs/api-reference.md`, `docs/user-guide.md`, `docs/se2-handoff.md`, `CHANGELOG.md`, and the six PNG diagrams in `docs/diagrams/` (`architecture.png`, `erd.png`, `use-case.png`, `class.png`, `sequence.png`, `activity.png`); linked the portfolio from `README.md`.
+- Evidence: `feature/portfolio` branch · `$env:CHECK_WEEK=16; npm run check` passing Criteria `A`–`O`
+- Problem I hit: Running `npm run docs:dictionary` only preserves existing column/table descriptions if you edit inside the generated structure carefully, and writing diagrams from memory risks documenting Week 6 design guesses instead of the actual implemented constraints and endpoints.
+- How I solved it: Generated `docs/data-dictionary.md` directly from PostgreSQL and `docs/api-reference.md` directly from `src/docs/openapi.yaml`, verified constraint names and status enums (`LOBBY`/`ACTIVE`/`RUNNING`/`FINISHED`) against Sequelize migrations and models before drawing the 6 diagrams, and documented exact schema/API behavior for SE2 handoff.
+- Decision I made and why: Kept `docs/api-reference.md` and the table/column headers in `docs/data-dictionary.md` strictly generator-owned via `npm run docs:api` and `npm run docs:dictionary` instead of hand-editing generated API sections, accepting that generator formatting rules dictate layout in exchange for zero drift from PostgreSQL and OpenAPI 3.0.
+- Changes to my design set: Marked the SE1 codebase as frozen at `v1.0.0` (`package.json` and `CHANGELOG.md`) with no schema or endpoint changes, adding the final portfolio and SE2 backlog documentation.
+- What I would explain to a classmate: Why documenting the system *as built* (exact `ck_sessions_status` states, `409` guards, `toUserJson` stripping, and Postman/Jest test counts) prevents the SE2 frontend team from coding against outdated Week 6 diagrams.
 
 ## M7 · The Test Report
